@@ -30,13 +30,13 @@ class MonologServiceProviderTest extends TestCase
 {
     private $currErrorHandler;
 
-    protected function setUp()
+    protected function setup(): void
     {
         $this->currErrorHandler = set_error_handler('var_dump');
         restore_error_handler();
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         set_error_handler($this->currErrorHandler);
     }
@@ -58,7 +58,7 @@ class MonologServiceProviderTest extends TestCase
         $this->assertTrue($app['monolog.handler']->hasDebug('< 200'));
 
         $records = $app['monolog.handler']->getRecords();
-        $this->assertContains('Matched route "{route}".', $records[0]['message']);
+        $this->assertStringContainsString('Matched route "{route}".', $records[0]['message']);
         $this->assertSame('GET_foo', $records[0]['context']['route']);
     }
 
@@ -67,7 +67,7 @@ class MonologServiceProviderTest extends TestCase
         $app = $this->getApplication();
 
         $app->get('/log', function () use ($app) {
-            $app['monolog']->addDebug('logging a message');
+            $app['monolog']->debug('logging a message');
         });
 
         $this->assertFalse($app['monolog.handler']->hasDebugRecords());
@@ -106,7 +106,7 @@ class MonologServiceProviderTest extends TestCase
         $request = Request::create('/error');
         $app->handle($request);
 
-        $pattern = "#Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\NotFoundHttpException: No route found for \"GET /error\" \(uncaught exception\) at .* line \d+#";
+        $pattern = "#Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\NotFoundHttpException: No route found for \"GET http:\/\/localhost\/error\" \(uncaught exception\) at .* line \d+#";
         $this->assertMatchingRecord($pattern, Logger::ERROR, $app['monolog.handler']);
 
         /*
@@ -174,12 +174,10 @@ class MonologServiceProviderTest extends TestCase
         $this->assertSame(Logger::INFO, $app['monolog.handler']->getLevel());
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Provided logging level 'foo' does not exist. Must be a valid monolog logging level.
-     */
     public function testNonExistentStringErrorLevel()
     {
+        $this->expectException(\InvalidArgumentException::class);
+
         $app = $this->getApplication();
         $app['monolog.level'] = 'foo';
 

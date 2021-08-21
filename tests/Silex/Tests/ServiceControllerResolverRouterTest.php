@@ -38,6 +38,6 @@ class ServiceControllerResolverRouterTest extends RouterTest
     {
         $request = Request::create($path, $method);
         $response = $app->handle($request);
-        $this->assertEquals($expectedContent, $response->getContent(), $message);
+        $this->assertEquals($expectedContent, $response->getContent(), (string) $message);
     }
 }

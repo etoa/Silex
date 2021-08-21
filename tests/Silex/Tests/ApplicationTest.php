@@ -11,8 +11,6 @@
 
 namespace Silex\Tests;
 
-use Fig\Link\GenericLinkProvider;
-use Fig\Link\Link;
 use PHPUnit\Framework\TestCase;
 use Silex\Application;
 use Silex\ControllerCollection;
@@ -23,8 +21,10 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\Routing\RouteCollection;
+use Symfony\Component\WebLink\GenericLinkProvider;
+use Symfony\Component\WebLink\Link;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Application test cases.
@@ -133,11 +133,11 @@ class ApplicationTest extends TestCase
         $app = new Application();
         $app['pass'] = false;
 
-        $app->on('test', function (Event $e) use ($app) {
+        $app->on(Event::class, function (Event $e) use ($app) {
             $app['pass'] = true;
         });
 
-        $app['dispatcher']->dispatch('test');
+        $app['dispatcher']->dispatch(new Event());
 
         $this->assertTrue($app['pass']);
     }
@@ -405,11 +405,10 @@ class ApplicationTest extends TestCase
         $this->assertSame(['1_routeTriggered', '2_filterAfter', '3_responseSent', '4_filterFinish'], $containerTarget);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testNonResponseAndNonNullReturnFromRouteBeforeMiddlewareShouldThrowRuntimeException()
     {
+        $this->expectException(\RuntimeException::class);
+
         $app = new Application();
 
         $middleware = function (Request $request) {
@@ -424,11 +423,10 @@ class ApplicationTest extends TestCase
         $app->handle(Request::create('/'), HttpKernelInterface::MASTER_REQUEST, false);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testNonResponseAndNonNullReturnFromRouteAfterMiddlewareShouldThrowRuntimeException()
     {
+        $this->expectException(\RuntimeException::class);
+
         $app = new Application();
 
         $middleware = function (Request $request) {
@@ -487,22 +485,20 @@ class ApplicationTest extends TestCase
         $this->assertEquals(['first', 'second', 'third'], array_keys(iterator_to_array($app['routes'])));
     }
 
-    /**
-     * @expectedException        \LogicException
-     * @expectedExceptionMessage The "mount" method takes either a "ControllerCollection" instance, "ControllerProviderInterface" instance, or a callable.
-     */
     public function testMountNullException()
     {
+        $this->expectException(\LogicException::class);
+        $this->expectErrorMessage('The "mount" method takes either a "ControllerCollection" instance, "ControllerProviderInterface" instance, or a callable.');
+
         $app = new Application();
         $app->mount('/exception', null);
     }
 
-    /**
-     * @expectedException        \LogicException
-     * @expectedExceptionMessage The method "Silex\Tests\IncorrectControllerCollection::connect" must return a "ControllerCollection" instance. Got: "NULL"
-     */
     public function testMountWrongConnectReturnValueException()
     {
+        $this->expectException(\LogicException::class);
+        $this->expectErrorMessage('The method "Silex\Tests\IncorrectControllerCollection::connect" must return a "ControllerCollection" instance. Got: "NULL"');
+
         $app = new Application();
         $app->mount('/exception', new IncorrectControllerCollection());
     }
@@ -528,12 +524,11 @@ class ApplicationTest extends TestCase
         $this->assertEquals(__FILE__, (string) $response->getFile());
     }
 
-    /**
-     * @expectedException        \LogicException
-     * @expectedExceptionMessage The "homepage" route must have code to run when it matches.
-     */
     public function testGetRouteCollectionWithRouteWithoutController()
     {
+        $this->expectException(\LogicException::class);
+        $this->expectErrorMessage('The "homepage" route must have code to run when it matches.');
+
         $app = new Application();
         unset($app['exception_handler']);
         $app->match('/')->bind('homepage');

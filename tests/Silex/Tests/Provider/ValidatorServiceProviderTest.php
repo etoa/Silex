@@ -201,6 +201,6 @@ class ValidatorServiceProviderTest extends TestCase
         $app->register(new ValidatorServiceProvider());
         $app->register(new TranslationServiceProvider());
 
-        $this->assertInternalType('array', $app['translator.resources']);
+        $this->assertIsArray($app['translator.resources']);
     }
 }

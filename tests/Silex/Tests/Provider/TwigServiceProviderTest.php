@@ -11,7 +11,6 @@
 
 namespace Silex\Tests\Provider;
 
-use Fig\Link\Link;
 use PHPUnit\Framework\TestCase;
 use Silex\Application;
 use Silex\Provider\CsrfServiceProvider;
@@ -19,6 +18,9 @@ use Silex\Provider\FormServiceProvider;
 use Silex\Provider\TwigServiceProvider;
 use Silex\Provider\AssetServiceProvider;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\WebLink\Link;
+use Twig\Environment;
+use Twig\Loader\LoaderInterface;
 
 /**
  * TwigProvider test cases.
@@ -50,8 +52,8 @@ class TwigServiceProviderTest extends TestCase
         $app->register(new TwigServiceProvider(), [
             'twig.templates' => ['foo' => 'foo'],
         ]);
-        $loader = $this->getMockBuilder('\Twig_LoaderInterface')->getMock();
-        if (method_exists('\Twig_LoaderInterface', 'getSourceContext')) {
+        $loader = $this->getMockBuilder(LoaderInterface::class)->getMock();
+        if (method_exists(LoaderInterface::class, 'getSourceContext')) {
             $loader->expects($this->never())->method('getSourceContext');
         }
         $app['twig.loader.filesystem'] = function ($app) use ($loader) {
@@ -107,7 +109,7 @@ class TwigServiceProviderTest extends TestCase
         $app->register(new CsrfServiceProvider());
         $app->register(new TwigServiceProvider());
 
-        $this->assertInstanceOf('Twig_Environment', $app['twig']);
+        $this->assertInstanceOf(Environment::class, $app['twig']);
         $this->assertInstanceOf('Symfony\Bridge\Twig\Form\TwigRendererEngine', $app['twig.form.engine']);
         $this->assertInstanceOf('Symfony\Component\Form\FormRenderer', $app['twig.form.renderer']);
     }
@@ -118,7 +120,7 @@ class TwigServiceProviderTest extends TestCase
         $app->register(new FormServiceProvider());
         $app->register(new TwigServiceProvider());
 
-        $this->assertInstanceOf('Twig_Environment', $app['twig']);
+        $this->assertInstanceOf(Environment::class, $app['twig']);
     }
 
     public function testFormatParameters()

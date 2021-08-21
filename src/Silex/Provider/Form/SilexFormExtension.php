@@ -14,6 +14,7 @@ namespace Silex\Provider\Form;
 use Pimple\Container;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Form\FormExtensionInterface;
+use Symfony\Component\Form\FormTypeExtensionInterface;
 use Symfony\Component\Form\FormTypeGuesserChain;
 
 class SilexFormExtension implements FormExtensionInterface
@@ -33,7 +34,7 @@ class SilexFormExtension implements FormExtensionInterface
         $this->setGuessers($guessers);
     }
 
-    public function getType($name)
+    public function getType(string $name)
     {
         if (!isset($this->types[$name])) {
             throw new InvalidArgumentException(sprintf('The type "%s" is not the name of a registered form type.', $name));
@@ -45,17 +46,17 @@ class SilexFormExtension implements FormExtensionInterface
         return $this->types[$name];
     }
 
-    public function hasType($name)
+    public function hasType(string $name)
     {
         return isset($this->types[$name]);
     }
 
-    public function getTypeExtensions($name)
+    public function getTypeExtensions(string $name)
     {
         return isset($this->typeExtensions[$name]) ? $this->typeExtensions[$name] : [];
     }
 
-    public function hasTypeExtensions($name)
+    public function hasTypeExtensions(string $name)
     {
         return isset($this->typeExtensions[$name]);
     }
@@ -95,6 +96,9 @@ class SilexFormExtension implements FormExtensionInterface
         }
     }
 
+    /**
+     * @param FormTypeExtensionInterface[] $typeExtensions
+     */
     private function setTypeExtensions(array $typeExtensions)
     {
         $this->typeExtensions = [];
@@ -105,7 +109,10 @@ class SilexFormExtension implements FormExtensionInterface
                 }
                 $extension = $this->app[$extension];
             }
-            $this->typeExtensions[$extension->getExtendedType()][] = $extension;
+
+            foreach ($extension::getExtendedTypes() as $type) {
+                $this->typeExtensions[$type][] = $extension;
+            }
         }
     }
 

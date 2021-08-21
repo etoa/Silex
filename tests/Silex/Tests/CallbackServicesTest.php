@@ -15,6 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Silex\Provider\ServiceControllerServiceProvider;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * Callback as services test cases.
@@ -38,7 +39,7 @@ class CallbackServicesTest extends TestCase
         $app->after('service:afterApp');
         $app->finish('service:finishApp');
         $app->error('service:error');
-        $app->on('kernel.request', 'service:onRequest');
+        $app->on(KernelEvents::REQUEST, 'service:onRequest');
 
         $app
             ->match('/', 'service:controller')

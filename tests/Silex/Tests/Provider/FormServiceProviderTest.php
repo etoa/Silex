@@ -83,12 +83,11 @@ class FormServiceProviderTest extends TestCase
         $this->assertInstanceOf('Symfony\Component\Form\Form', $form);
     }
 
-    /**
-     * @expectedException \Symfony\Component\Form\Exception\InvalidArgumentException
-     * @expectedExceptionMessage Invalid form type. The silex service "dummy" does not exist.
-     */
     public function testNonExistentTypeService()
     {
+        $this->expectException(\Symfony\Component\Form\Exception\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid form type. The silex service "dummy" does not exist.');
+
         $app = new Application();
 
         $app->register(new FormServiceProvider());
@@ -147,12 +146,11 @@ class FormServiceProviderTest extends TestCase
         $this->assertInstanceOf('Symfony\Component\Form\Form', $form);
     }
 
-    /**
-     * @expectedException \Symfony\Component\Form\Exception\InvalidArgumentException
-     * @expectedExceptionMessage Invalid form type extension. The silex service "dummy.form.type.extension" does not exist.
-     */
     public function testNonExistentTypeExtensionService()
     {
+        $this->expectException(\Symfony\Component\Form\Exception\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid form type extension. The silex service "dummy.form.type.extension" does not exist.');
+
         $app = new Application();
 
         $app->register(new FormServiceProvider());
@@ -202,12 +200,11 @@ class FormServiceProviderTest extends TestCase
         $this->assertInstanceOf('Symfony\Component\Form\FormFactory', $app['form.factory']);
     }
 
-    /**
-     * @expectedException \Symfony\Component\Form\Exception\InvalidArgumentException
-     * @expectedExceptionMessage Invalid form type guesser. The silex service "dummy.form.type.guesser" does not exist.
-     */
     public function testNonExistentTypeGuesserService()
     {
+        $this->expectException(\Symfony\Component\Form\Exception\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid form type guesser. The silex service "dummy.form.type.guesser" does not exist.');
+
         $app = new Application();
 
         $app->register(new FormServiceProvider());
@@ -250,10 +247,10 @@ class FormServiceProviderTest extends TestCase
         $this->assertFalse($form->isValid());
         $r = new \ReflectionMethod($form, 'getErrors');
         if (!$r->getNumberOfParameters()) {
-            $this->assertContains('ERROR: German translation', $form->getErrorsAsString());
+            $this->assertStringContainsString('ERROR: German translation', $form->getErrorsAsString());
         } else {
             // as of 2.5
-            $this->assertContains('ERROR: German translation', (string) $form->getErrors(true, false));
+            $this->assertStringContainsString('ERROR: German translation', (string) $form->getErrors(true, false));
         }
     }
 
@@ -318,9 +315,9 @@ class DummyFormType extends AbstractType
 
 class DummyFormTypeExtension extends AbstractTypeExtension
 {
-    public function getExtendedType()
+    public static function getExtendedTypes(): iterable
     {
-        return 'Symfony\Component\Form\Extension\Core\Type\FileType';
+        return ['Symfony\Component\Form\Extension\Core\Type\FileType'];
     }
 
     public function configureOptions(OptionsResolver $resolver)

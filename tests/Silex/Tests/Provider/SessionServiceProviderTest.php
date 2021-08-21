@@ -14,8 +14,8 @@ namespace Silex\Tests\Provider;
 use Silex\Application;
 use Silex\WebTestCase;
 use Silex\Provider\SessionServiceProvider;
-use Symfony\Component\HttpKernel\Client;
 use Symfony\Component\HttpFoundation\Session;
+use Symfony\Component\HttpKernel\HttpKernelBrowser;
 
 /**
  * SessionProvider test cases.
@@ -92,7 +92,9 @@ class SessionServiceProviderTest extends WebTestCase
         $app['debug'] = true;
         unset($app['exception_handler']);
 
-        $client = new Client($app);
+        $this->app = $app;
+
+        $client = $this->createClient();
 
         $client->request('get', '/');
         $this->assertEquals('A welcome page.', $client->getResponse()->getContent());
