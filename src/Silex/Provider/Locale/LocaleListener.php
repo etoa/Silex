@@ -12,7 +12,7 @@
 namespace Silex\Provider\Locale;
 
 use Pimple\Container;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\FinishRequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,7 +41,7 @@ class LocaleListener implements EventSubscriberInterface
         $this->requestContext = $requestContext;
     }
 
-    public function onKernelRequest(GetResponseEvent $event)
+    public function onKernelRequest(RequestEvent $event)
     {
         $request = $event->getRequest();
         $request->setDefaultLocale($this->defaultLocale);

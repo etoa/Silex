@@ -11,6 +11,7 @@
 
 namespace Silex\Provider;
 
+use Monolog\Handler\FingersCrossed\ErrorLevelActivationStrategy;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Monolog\Formatter\LineFormatter;
@@ -38,20 +39,16 @@ class MonologServiceProvider implements ServiceProviderInterface, BootableProvid
             return $app['monolog'];
         };
 
-        if ($bridge = class_exists('Symfony\Bridge\Monolog\Logger')) {
-            if (isset($app['request_stack'])) {
-                $app['monolog.not_found_activation_strategy'] = function () use ($app) {
-                    $level = MonologServiceProvider::translateLevel($app['monolog.level']);
+        if (isset($app['request_stack'])) {
+            $app['monolog.not_found_activation_strategy'] = function () use ($app) {
+                $level = MonologServiceProvider::translateLevel($app['monolog.level']);
 
-                    return new NotFoundActivationStrategy($app['request_stack'], ['^/'], $level);
-                };
-            }
+                return new NotFoundActivationStrategy($app['request_stack'], ['^/'], new ErrorLevelActivationStrategy($level));
+            };
         }
 
-        $app['monolog.logger.class'] = $bridge ? 'Symfony\Bridge\Monolog\Logger' : 'Monolog\Logger';
-
-        $app['monolog'] = function ($app) use ($bridge) {
-            $log = new $app['monolog.logger.class']($app['monolog.name']);
+        $app['monolog'] = function ($app) {
+            $log = new \Symfony\Bridge\Monolog\Logger($app['monolog.name']);
 
             $handler = new Handler\GroupHandler($app['monolog.handlers']);
             if (isset($app['monolog.not_found_activation_strategy'])) {
@@ -60,7 +57,7 @@ class MonologServiceProvider implements ServiceProviderInterface, BootableProvid
 
             $log->pushHandler($handler);
 
-            if ($app['debug'] && $bridge) {
+            if ($app['debug']) {
                 $log->pushProcessor(new DebugProcessor());
             }
 

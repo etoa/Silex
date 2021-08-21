@@ -13,7 +13,7 @@ namespace Silex\Tests\Application;
 
 use PHPUnit\Framework\TestCase;
 use Silex\Provider\SecurityServiceProvider;
-use Symfony\Component\Security\Core\User\User;
+use Symfony\Component\Security\Core\User\InMemoryUser;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -27,7 +27,7 @@ class SecurityTraitTest extends TestCase
             'fabien' => ['ROLE_ADMIN', '$2y$15$lzUNsTegNXvZW3qtfucV0erYBcEqWVeyOmjolB7R1uodsAVJ95vvu'],
         ]);
 
-        $user = new User('foo', 'bar');
+        $user = new InMemoryUser('foo', 'bar');
         $password = 'foo';
         $encoded = $app->encodePassword($user, $password);
 
@@ -36,11 +36,10 @@ class SecurityTraitTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException \Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException
-     */
     public function testIsGrantedWithoutTokenThrowsException()
     {
+        $this->expectException(\Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException::class);
+
         $app = $this->createApplication();
         $app->get('/', function () { return 'foo'; });
         $app->handle(Request::create('/'));

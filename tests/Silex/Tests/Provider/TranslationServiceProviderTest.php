@@ -57,21 +57,6 @@ class TranslationServiceProviderTest extends TestCase
         return $app;
     }
 
-    public function transChoiceProvider()
-    {
-        return [
-            ['key2', 0, null, '0 apples'],
-            ['key2', 1, null, 'One apple'],
-            ['key2', 2, null, '2 apples'],
-            ['key2', 0, 'de', '0 german apples'],
-            ['key2', 1, 'de', 'One german apple'],
-            ['key2', 2, 'de', '2 german apples'],
-            ['key2', 0, 'ru', '0 apples'], // fallback
-            ['key2', 1, 'ru', 'One apple'], // fallback
-            ['key2', 2, 'ru', '2 apples'], // fallback
-        ];
-    }
-
     public function transProvider()
     {
         return [
@@ -93,17 +78,6 @@ class TranslationServiceProviderTest extends TestCase
 
         $result = $app['translator']->trans($key, [], null, $locale);
 
-        $this->assertEquals($expected, $result);
-    }
-
-    /**
-     * @dataProvider transChoiceProvider
-     */
-    public function testTransChoiceForDefaultLanguage($key, $number, $locale, $expected)
-    {
-        $app = $this->getPreparedApp();
-
-        $result = $app['translator']->transChoice($key, $number, ['%count%' => $number], null, $locale);
         $this->assertEquals($expected, $result);
     }
 

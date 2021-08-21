@@ -14,6 +14,7 @@ namespace Silex\Tests;
 use Silex\Application;
 use Silex\WebTestCase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Functional test cases.
@@ -27,18 +28,18 @@ class WebTestCaseTest extends WebTestCase
         $app = new Application();
 
         $app->match('/hello', function () {
-            return 'world';
+            return new Response('world');
         });
 
         $app->match('/html', function () {
-            return '<h1>title</h1>';
+            return new Response('<h1>title</h1>');
         });
 
         $app->match('/server', function (Request $request) use ($app) {
             $user = $request->server->get('PHP_AUTH_USER');
             $pass = $request->server->get('PHP_AUTH_PW');
 
-            return "<h1>$user:$pass</h1>";
+            return new Response("<h1>$user:$pass</h1>");
         });
 
         return $app;

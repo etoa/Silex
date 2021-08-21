@@ -31,11 +31,10 @@ class ControllerTest extends TestCase
         $this->assertEquals('foo', $controller->getRouteName());
     }
 
-    /**
-     * @expectedException \Silex\Exception\ControllerFrozenException
-     */
     public function testBindOnFrozenControllerShouldThrowException()
     {
+        $this->expectException(\Silex\Exception\ControllerFrozenException::class);
+
         $controller = new Controller(new Route('/foo'));
         $controller->bind('foo');
         $controller->freeze();
@@ -110,11 +109,10 @@ class ControllerTest extends TestCase
         $this->assertEquals('foo', $route->foo);
     }
 
-    /**
-     * @expectedException \BadMethodCallException
-     */
     public function testRouteMethodDoesNotExist()
     {
+        $this->expectException(\BadMethodCallException::class);
+
         $route = new MyRoute();
 
         $controller = new Controller($route);
