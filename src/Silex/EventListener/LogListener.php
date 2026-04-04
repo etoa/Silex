@@ -68,7 +68,11 @@ class LogListener implements EventSubscriberInterface
      */
     public function onKernelResponse(ResponseEvent $event)
     {
-        if (!$event->isMasterRequest()) {
+        if (method_exists($event, 'isMasterRequest') && !$event->isMasterRequest()) {
+            return;
+        }
+
+        if (method_exists($event, 'isMainRequest') && !$event->isMainRequest()) {
             return;
         }
 

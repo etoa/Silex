@@ -197,7 +197,7 @@ class MiddlewareTest extends TestCase
         });
 
         $app->match('/foo/{project}', function () use ($app) {
-            return $app['project'];
+            return new Response($app['project']);
         });
 
         $request = Request::create('/foo/bar');

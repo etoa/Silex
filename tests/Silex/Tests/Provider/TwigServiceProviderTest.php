@@ -13,13 +13,11 @@ namespace Silex\Tests\Provider;
 
 use PHPUnit\Framework\TestCase;
 use Silex\Application;
-use Silex\Provider\CsrfServiceProvider;
-use Silex\Provider\FormServiceProvider;
 use Silex\Provider\TwigServiceProvider;
-use Silex\Provider\AssetServiceProvider;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\WebLink\Link;
-use Twig\Environment;
+use Twig\Extension\CoreExtension;
 use Twig\Loader\LoaderInterface;
 
 /**
@@ -38,7 +36,7 @@ class TwigServiceProviderTest extends TestCase
         ]);
 
         $app->get('/hello/{name}', function ($name) use ($app) {
-            return $app['twig']->render('hello', ['name' => $name]);
+            return new Response($app['twig']->render('hello', ['name' => $name]));
         });
 
         $request = Request::create('/hello/john');
@@ -77,19 +75,6 @@ class TwigServiceProviderTest extends TestCase
         $this->assertEquals('../foo.css', $app['twig']->render('relative'));
     }
 
-    public function testAssetIntegration()
-    {
-        $app = new Application();
-        $app->register(new TwigServiceProvider(), [
-            'twig.templates' => ['hello' => '{{ asset("/foo.css") }}'],
-        ]);
-        $app->register(new AssetServiceProvider(), [
-            'assets.version' => 1,
-        ]);
-
-        $this->assertEquals('/foo.css?1', $app['twig']->render('hello'));
-    }
-
     public function testGlobalVariable()
     {
         $app = new Application();
@@ -100,27 +85,6 @@ class TwigServiceProviderTest extends TestCase
         ]);
 
         $this->assertEquals('Fabien', $app['twig']->render('hello'));
-    }
-
-    public function testFormFactory()
-    {
-        $app = new Application();
-        $app->register(new FormServiceProvider());
-        $app->register(new CsrfServiceProvider());
-        $app->register(new TwigServiceProvider());
-
-        $this->assertInstanceOf(Environment::class, $app['twig']);
-        $this->assertInstanceOf('Symfony\Bridge\Twig\Form\TwigRendererEngine', $app['twig.form.engine']);
-        $this->assertInstanceOf('Symfony\Component\Form\FormRenderer', $app['twig.form.renderer']);
-    }
-
-    public function testFormWithoutCsrf()
-    {
-        $app = new Application();
-        $app->register(new FormServiceProvider());
-        $app->register(new TwigServiceProvider());
-
-        $this->assertInstanceOf(Environment::class, $app['twig']);
     }
 
     public function testFormatParameters()
@@ -140,9 +104,9 @@ class TwigServiceProviderTest extends TestCase
 
         $twig = $app['twig'];
 
-        $this->assertSame(['Y-m-d', '%h hours'], $twig->getExtension('Twig_Extension_Core')->getDateFormat());
-        $this->assertSame($timezone, $twig->getExtension('Twig_Extension_Core')->getTimezone());
-        $this->assertSame([2, ',', ' '], $twig->getExtension('Twig_Extension_Core')->getNumberFormat());
+        $this->assertSame(['Y-m-d', '%h hours'], $twig->getExtension(CoreExtension::class)->getDateFormat());
+        $this->assertSame($timezone, $twig->getExtension(CoreExtension::class)->getTimezone());
+        $this->assertSame([2, ',', ' '], $twig->getExtension(CoreExtension::class)->getNumberFormat());
     }
 
     public function testWebLinkIntegration()

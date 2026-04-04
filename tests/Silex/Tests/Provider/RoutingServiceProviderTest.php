@@ -16,6 +16,7 @@ use Pimple\Container;
 use Silex\Application;
 use Silex\Provider\RoutingServiceProvider;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
@@ -48,7 +49,7 @@ class RoutingServiceProviderTest extends TestCase
             ->bind('hello');
 
         $app->get('/', function () use ($app) {
-            return $app['url_generator']->generate('hello', ['name' => 'john']);
+            return new Response($app['url_generator']->generate('hello', ['name' => 'john']));
         });
 
         $request = Request::create('/');
@@ -65,7 +66,7 @@ class RoutingServiceProviderTest extends TestCase
             ->bind('hello');
 
         $app->get('/', function () use ($app) {
-            return $app['url_generator']->generate('hello', ['name' => 'john'], UrlGeneratorInterface::ABSOLUTE_URL);
+            return new Response($app['url_generator']->generate('hello', ['name' => 'john'], UrlGeneratorInterface::ABSOLUTE_URL));
         });
 
         $request = Request::create('https://localhost:81/');
@@ -83,7 +84,7 @@ class RoutingServiceProviderTest extends TestCase
             ->requireHttp();
 
         $app->get('/', function () use ($app) {
-            return $app['url_generator']->generate('insecure_page');
+            return new Response($app['url_generator']->generate('insecure_page'));
         });
 
         $request = Request::create('https://localhost/');
@@ -101,7 +102,7 @@ class RoutingServiceProviderTest extends TestCase
             ->requireHttps();
 
         $app->get('/', function () use ($app) {
-            return $app['url_generator']->generate('secure_page');
+            return new Response($app['url_generator']->generate('secure_page'));
         });
 
         $request = Request::create('http://localhost/');

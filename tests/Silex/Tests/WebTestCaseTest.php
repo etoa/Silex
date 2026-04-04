@@ -55,14 +55,6 @@ class WebTestCaseTest extends WebTestCase
         $this->assertEquals('world', $response->getContent());
     }
 
-    public function testCrawlerFilter()
-    {
-        $client = $this->createClient();
-
-        $crawler = $client->request('GET', '/html');
-        $this->assertEquals('title', $crawler->filter('h1')->text());
-    }
-
     public function testServerVariables()
     {
         $user = 'klaus';

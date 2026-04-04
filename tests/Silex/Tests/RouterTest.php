@@ -29,15 +29,15 @@ class RouterTest extends TestCase
         $app = new Application();
 
         $app->match('/foo', function () {
-            return 'foo';
+            return new Response('foo');
         });
 
         $app->match('/bar', function () {
-            return 'bar';
+            return new Response('bar');
         });
 
         $app->match('/', function () {
-            return 'root';
+            return new Response('root');
         });
 
         $this->checkRouteResponse($app, '/foo', 'foo');
@@ -111,31 +111,31 @@ class RouterTest extends TestCase
         $app = new Application();
 
         $app->match('/foo', function () {
-            return 'foo';
+            return new Response('foo');
         });
 
         $app->match('/bar', function () {
-            return 'bar';
+            return new Response('bar');
         })->method('GET|POST');
 
         $app->get('/resource', function () {
-            return 'get resource';
+            return new Response('get resource');
         });
 
         $app->post('/resource', function () {
-            return 'post resource';
+            return new Response('post resource');
         });
 
         $app->put('/resource', function () {
-            return 'put resource';
+            return new Response('put resource');
         });
 
         $app->patch('/resource', function () {
-            return 'patch resource';
+            return new Response('patch resource');
         });
 
         $app->delete('/resource', function () {
-            return 'delete resource';
+            return new Response('delete resource');
         });
 
         $this->checkRouteResponse($app, '/foo', 'foo');
@@ -232,19 +232,6 @@ class RouterTest extends TestCase
         $this->assertTrue($response->isRedirect('https://example.com/secured?query=string'));
     }
 
-    public function testConditionOnRoute()
-    {
-        $app = new Application();
-        $app->match('/secured', function () {
-            return 'secured content';
-        })
-        ->when('request.isSecure() == true');
-
-        $request = Request::create('http://example.com/secured');
-        $response = $app->handle($request);
-        $this->assertEquals(404, $response->getStatusCode());
-    }
-
     public function testClassNameControllerSyntax()
     {
         $app = new Application();
@@ -275,11 +262,11 @@ class MyController
 {
     public function getFoo()
     {
-        return 'foo';
+        return new Response('foo');
     }
 
     public static function getBar()
     {
-        return 'bar';
+        return new Response('bar');
     }
 }

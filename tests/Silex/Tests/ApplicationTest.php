@@ -75,7 +75,7 @@ class ApplicationTest extends TestCase
 
         $app = new Application();
         $app->get('/', function (Request $req) use ($request) {
-            return $request === $req ? 'ok' : 'ko';
+            return new Response($request === $req ? 'ok' : 'ko');
         });
 
         $this->assertEquals('ok', $app->handle($request)->getContent());
@@ -114,14 +114,14 @@ class ApplicationTest extends TestCase
         $app = new Application();
 
         $app->get('/foo/{foo}', function (\ArrayObject $foo) {
-            return $foo['foo'];
+            return new Response($foo['foo']);
         })->convert('foo', function ($foo) { return new \ArrayObject(['foo' => $foo]); });
 
         $response = $app->handle(Request::create('/foo/bar'));
         $this->assertEquals('bar', $response->getContent());
 
         $app->get('/foo/{foo}/{bar}', function (\ArrayObject $foo) {
-            return $foo['foo'];
+            return new Response($foo['foo']);
         })->convert('foo', function ($foo, Request $request) { return new \ArrayObject(['foo' => $foo.$request->attributes->get('bar')]); });
 
         $response = $app->handle(Request::create('/foo/foo/bar'));
@@ -185,16 +185,6 @@ class ApplicationTest extends TestCase
         $this->assertEquals('Hello Fabien', $app->handle(Request::create('/Fabien'))->getContent());
     }
 
-    public function testApplicationTypeHintWorks()
-    {
-        $app = new SpecialApplication();
-        unset($app['exception_handler']);
-
-        $app->get('/{name}', 'Silex\Tests\FooController::barSpecialAction');
-
-        $this->assertEquals('Hello Fabien in Silex\Tests\SpecialApplication', $app->handle(Request::create('/Fabien'))->getContent());
-    }
-
     /**
      * @requires PHP 7.0
      */
@@ -205,7 +195,7 @@ class ApplicationTest extends TestCase
 
         $app->get('/{name}', 'Silex\Tests\Fixtures\Php7Controller::typehintedAction');
 
-        $this->assertEquals('Hello Fabien in Silex\Tests\SpecialApplication', $app->handle(Request::create('/Fabien'))->getContent());
+        $this->assertEquals('Hello Fabien', $app->handle(Request::create('/Fabien'))->getContent());
     }
 
     public function testHttpSpec()
@@ -214,7 +204,7 @@ class ApplicationTest extends TestCase
         $app['charset'] = 'ISO-8859-1';
 
         $app->get('/', function () {
-            return 'hello';
+            return new Response('hello');
         });
 
         // content is empty for HEAD requests
@@ -261,7 +251,7 @@ class ApplicationTest extends TestCase
         $app->get('/reached', function () use (&$middlewareTarget) {
             $middlewareTarget[] = 'route_triggered';
 
-            return 'hello';
+            return new Response('hello');
         })
         ->before($beforeMiddleware1)
         ->before($beforeMiddleware2)
@@ -434,11 +424,11 @@ class ApplicationTest extends TestCase
         };
 
         $app->get('/', function () {
-            return 'hello';
+            return new Response('hello');
         })
         ->after($middleware);
 
-        $app->handle(Request::create('/'), HttpKernelInterface::MASTER_REQUEST, false);
+        $app->handle(Request::create('/'), HttpKernelInterface::MAIN_REQUEST, false);
     }
 
     public function testSubRequest()
@@ -609,7 +599,7 @@ class ApplicationTest extends TestCase
         });
 
         $app->view(function (array $view) {
-            return $view['msg'];
+            return new Response($view['msg']);
         });
 
         $response = $app->handle(Request::create('/foo'));
@@ -620,7 +610,7 @@ class ApplicationTest extends TestCase
     public function testViewListenersAreIgnoredIfNotSuitable()
     {
         $app = new Application();
-        $app->get('/foo', function () { return 'Hello world'; });
+        $app->get('/foo', function () { return new Response('Hello world'); });
 
         $app->view(function (\stdClass $view) {
             throw new \Exception('View listener was called');
@@ -641,7 +631,7 @@ class ApplicationTest extends TestCase
         $app->get('/foo', function () { return 'Hello world'; });
 
         $app->view(function ($view) {
-            return 'Hello view listener';
+            return new Response('Hello view listener');
         });
 
         $app->view(function ($view) {
@@ -651,22 +641,6 @@ class ApplicationTest extends TestCase
         $response = $app->handle(Request::create('/foo'));
 
         $this->assertEquals('Hello view listener', $response->getContent());
-    }
-
-    public function testWebLinkListener()
-    {
-        $app = new Application();
-
-        $app->get('/', function () {
-            return 'hello';
-        });
-
-        $request = Request::create('/');
-        $request->attributes->set('_links', (new GenericLinkProvider())->withLink(new Link('preload', '/foo.css')));
-
-        $response = $app->handle($request);
-
-        $this->assertEquals('</foo.css>; rel="preload"', $response->headers->get('Link'));
     }
 
     public function testDefaultRoutesFactory()
@@ -687,9 +661,9 @@ class ApplicationTest extends TestCase
 
 class FooController
 {
-    public function barAction(Application $app, $name)
+    public function barAction($name)
     {
-        return 'Hello '.$app->escape($name);
+        return new Response('Hello '.$name);
     }
 
     public function barSpecialAction(SpecialApplication $app, $name)

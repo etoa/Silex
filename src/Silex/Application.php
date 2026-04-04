@@ -469,7 +469,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      *
      * @param Request|null $request Request to process
      */
-    public function run(Request $request = null)
+    public function run(?Request $request = null)
     {
         if (null === $request) {
             $request = Request::createFromGlobals();
@@ -486,7 +486,7 @@ class Application extends Container implements HttpKernelInterface, TerminableIn
      * If you call this method directly instead of run(), you must call the
      * terminate() method yourself if you want the finish filters to be run.
      */
-    public function handle(Request $request, $type = HttpKernelInterface::MAIN_REQUEST, $catch = true)
+    public function handle(Request $request, int $type = HttpKernelInterface::MAIN_REQUEST, bool $catch = true): Response
     {
         if (!$this->booted) {
             $this->boot();

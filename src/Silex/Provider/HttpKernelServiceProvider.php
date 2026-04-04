@@ -5,11 +5,9 @@ namespace Silex\Provider;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Silex\Api\EventListenerProviderInterface;
-use Silex\AppArgumentValueResolver;
 use Silex\CallbackResolver;
 use Silex\EventListener\ConverterListener;
 use Silex\EventListener\MiddlewareListener;
-use Silex\EventListener\StringToResponseListener;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
@@ -35,8 +33,8 @@ class HttpKernelServiceProvider implements ServiceProviderInterface, EventListen
         $app['argument_metadata_factory'] = function ($app) {
             return new ArgumentMetadataFactory();
         };
-        $app['argument_value_resolvers'] = function ($app) {
-            return array_merge([new AppArgumentValueResolver($app)], ArgumentResolver::getDefaultArgumentValueResolvers());
+        $app['argument_value_resolvers'] = function () {
+            return array_merge([], ArgumentResolver::getDefaultArgumentValueResolvers());
         };
 
         $app['argument_resolver'] = function ($app) {
@@ -68,7 +66,6 @@ class HttpKernelServiceProvider implements ServiceProviderInterface, EventListen
         $dispatcher->addSubscriber(new ResponseListener($app['charset']));
         $dispatcher->addSubscriber(new MiddlewareListener($app));
         $dispatcher->addSubscriber(new ConverterListener($app['routes'], $app['callback_resolver']));
-        $dispatcher->addSubscriber(new StringToResponseListener());
 
         if (class_exists(HttpHeaderSerializer::class)) {
             $dispatcher->addSubscriber(new AddLinkHeaderListener());

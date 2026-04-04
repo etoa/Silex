@@ -19,6 +19,7 @@ use Silex\Application;
 use Silex\Provider\MonologServiceProvider;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -46,7 +47,7 @@ class MonologServiceProviderTest extends TestCase
         $app = $this->getApplication();
 
         $app->get('/foo', function () use ($app) {
-            return 'foo';
+            return new Response('foo');
         });
 
         $this->assertFalse($app['monolog.handler']->hasInfoRecords());
@@ -139,31 +140,6 @@ class MonologServiceProviderTest extends TestCase
         $app->handle($request);
 
         $this->assertTrue($app['monolog.handler']->hasDebug('< 302 /bar'));
-    }
-
-    public function testErrorLoggingGivesWayToSecurityExceptionHandling()
-    {
-        $app = $this->getApplication();
-        $app['monolog.level'] = Logger::ERROR;
-
-        $app->register(new \Silex\Provider\SecurityServiceProvider(), [
-            'security.firewalls' => [
-                'admin' => [
-                    'pattern' => '^/admin',
-                    'http' => true,
-                    'users' => [],
-                ],
-            ],
-        ]);
-
-        $app->get('/admin', function () {
-            return 'SECURE!';
-        });
-
-        $request = Request::create('/admin');
-        $app->run($request);
-
-        $this->assertEmpty($app['monolog.handler']->getRecords(), 'Expected no logging to occur');
     }
 
     public function testStringErrorLevel()

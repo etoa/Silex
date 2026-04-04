@@ -224,7 +224,7 @@ class ExceptionHandlerTest extends TestCase
         });
 
         $app->error(function ($e) {
-            return 'foo exception handler';
+            return new Response('foo exception handler');
         });
 
         $request = Request::create('/foo');
@@ -308,10 +308,10 @@ class ExceptionHandlerTest extends TestCase
         // Since we throw a standard Exception above only
         // the second error handler should fire
         $app->error(function (\LogicException $e) { // Extends \Exception
-            return 'Caught LogicException';
+            return new Response('Caught LogicException');
         });
         $app->error(function (\Exception $e) {
-            return 'Caught Exception';
+            return new Response('Caught Exception');
         });
 
         $request = Request::create('/foo');
@@ -333,10 +333,10 @@ class ExceptionHandlerTest extends TestCase
         // Since we throw a LogicException above
         // the first error handler should fire
         $app->error(function (\LogicException $e) { // Extends \Exception
-            return 'Caught LogicException';
+            return new Response('Caught LogicException');
         });
         $app->error(function (\Exception $e) {
-            return 'Caught Exception';
+            return new Response('Caught Exception');
         });
 
         $request = Request::create('/foo');
@@ -360,10 +360,10 @@ class ExceptionHandlerTest extends TestCase
         // the \Exception error handler is registered first and also
         // captures all exceptions that extend it
         $app->error(function (\Exception $e) {
-            return 'Caught Exception';
+            return new Response('Caught Exception');
         });
         $app->error(function (\LogicException $e) { // Extends \Exception
-            return 'Caught LogicException';
+            return new Response('Caught LogicException');
         });
 
         $request = Request::create('/foo');
@@ -399,6 +399,6 @@ class ExceptionHandlerTest extends TestCase
 
     public function exceptionHandler()
     {
-        return 'Caught Exception';
+        return new Response('Caught Exception');
     }
 }

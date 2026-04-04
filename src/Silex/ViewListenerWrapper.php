@@ -69,16 +69,19 @@ class ViewListenerWrapper
             $parameters = $callbackReflection->getParameters();
             $expectedControllerResult = $parameters[0];
 
-            if ($expectedControllerResult->getClass() && (!is_object($controllerResult) || !$expectedControllerResult->getClass()->isInstance($controllerResult))) {
-                return false;
-            }
+            if ($expectedControllerResult->getType()) {
+                $typeName = $expectedControllerResult->getType()->getName();
+                if ($typeName === 'array' && !is_array($controllerResult)) {
+                    return false;
+                }
 
-            if ($expectedControllerResult->isArray() && !is_array($controllerResult)) {
-                return false;
-            }
+                if (method_exists($expectedControllerResult, 'isCallable') && $typeName === 'callable' && !is_callable($controllerResult)) {
+                    return false;
+                }
 
-            if (method_exists($expectedControllerResult, 'isCallable') && $expectedControllerResult->isCallable() && !is_callable($controllerResult)) {
-                return false;
+                if (!in_array($typeName, ['array', 'callable'], true) && is_object($controllerResult) && $typeName !== get_class($controllerResult)) {
+                    return false;
+                }
             }
         }
 
